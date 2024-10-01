@@ -6,35 +6,42 @@ import {
   Delete,
   Body,
   Param,
+  UseGuards
 } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
+import { CreateUserDto } from 'src/auth/dto/create-user.dto';
 import { UsersService } from './users.service';
 import { User } from './interfaces/user.interface';
-@Controller('users')
+import { AuthGuard } from '@nestjs/passport';
+@Controller('api/v1')
 export class UsersController {
   constructor(private readonly UsersService: UsersService) {}
-  @Get()
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('getAll')
   findAll(): Promise<User[]> {
     return this.UsersService.findAll();
   }
 
-  @Get(':id')
+  @UseGuards(AuthGuard('jwt'))
+  @Get('get-user/:id')
   findOne(@Param('id') id): Promise<User> {
-    return this.UsersService.findOne(id);
+    return this.UsersService.findById(id);
   }
 
-  @Post()
+  @UseGuards(AuthGuard('jwt'))
+  @Post('add-user')
   create(@Body() CreateUser: CreateUserDto): Promise<User> {
-    console.log("CreateUser", CreateUser);
     return this.UsersService.create(CreateUser);
   }
 
-  @Delete(':id')
+  @UseGuards(AuthGuard('jwt'))
+  @Delete('del-user/:id')
   delete(@Param('id') id): Promise<void> {
     return this.UsersService.delete(id);
   }
 
-  @Put(':id')
+  @UseGuards(AuthGuard('jwt'))
+  @Put('update-user/:id')
   update(@Body() UpdateUser: CreateUserDto, @Param('id') id): Promise<User> {
     return this.UsersService.update(UpdateUser, id);
   }

@@ -1,19 +1,27 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { User } from './models/user.model';
-import { CreateUserDto } from './dto/create-user.dto';
+import { Users } from './users.model';
+import { CreateUserDto } from 'src/auth/dto/create-user.dto';
 
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectModel(User)
-    private userModel: typeof User,
+    @InjectModel(Users)
+    private userModel: typeof Users,
   ) {}
 
-  async findAll(): Promise<User[]> {
+  async findAll(): Promise<Users[]> {
     return this.userModel.findAll();
   }
-  async findOne(id: string): Promise<User> {
+  async findOne(email: string): Promise<Users> {
+    return this.userModel.findOne({
+      where: {
+        email,
+      },
+    });
+  }
+
+  async findById(id: string): Promise<Users> {
     return this.userModel.findOne({
       where: {
         id,
@@ -21,17 +29,17 @@ export class UsersService {
     });
   }
 
-  async create(User: CreateUserDto): Promise<User> {
+  async create(User: CreateUserDto): Promise<Users> {
     const newUser = new this.userModel(User);
     return await newUser.save();
   }
   async delete(id: string): Promise<void> {
-    const user = await this.findOne(id);
+    const user = await this.findById(id);
     await user.destroy();
   }
 
-  async update(User: CreateUserDto, id: string): Promise<User> {
-    const user = await this.findOne(id);
+  async update(User: CreateUserDto, id: string): Promise<Users> {
+    const user = await this.findById(id);
     return await user.update(User);
   }
 }
